@@ -48,14 +48,7 @@ class PiaWGDaemon:
             self.config[key] = current_param
 
         pia = piawg()
-
-        if self.config["REGION"] not in pia.server_list.keys():
-            error_msg = "{} Region is not a valid one ".format(
-                self.config["REGION"]
-            )
-
-            logging.error(error_msg)
-            raise KeyError(error_msg)
+        pia.set_region(self.config["REGION"])
 
         self.loop_delay = 5
         self.last_config_update = 0

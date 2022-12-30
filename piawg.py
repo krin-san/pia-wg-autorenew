@@ -52,6 +52,9 @@ class piawg:
             self.server_list[server['id']] = server
 
     def set_region(self, region_id):
+        if region_id not in self.server_list.keys():
+            raise KeyError('Region "{}" is not a valid one'.format(region_id))
+
         self.region = region_id
 
     def get_token(self, username, password):
