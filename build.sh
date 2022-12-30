@@ -1,2 +1,1 @@
- docker build --tag coleman2247/pia-wg-autorenew .
-
+docker buildx build --push --platform linux/amd64 --tag krinsan/pia-wg-autorenew .

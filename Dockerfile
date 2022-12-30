@@ -1,10 +1,9 @@
-FROM python:3.11-rc-bullseye
-
+FROM python:3.11-slim-bullseye
 
 COPY requirements.txt requirements.txt
 
 RUN apt-get -y update
-run apt -y install wireguard
+RUN apt -y install wireguard
 
 RUN pip3 install -r requirements.txt
 
@@ -13,4 +12,4 @@ COPY ./*.py /src/
 COPY ./*.txt /src/
 COPY ./*.crt /src/
 
-CMD [ "python3", "generate-config-auto.py"]
+CMD [ "python3", "generate-config-auto.py" ]
