@@ -22,6 +22,14 @@ class piawg:
 
         self.get_server_list()
 
+    def __print_response(self, response):
+        if response.status_code != 200:
+            print(response.content)
+        else:
+            try:
+                print(json.dumps(response.json(), indent=2))
+            except ValueError:
+                print(response.text)
 
     def __is_valid_response(self, response):
         return response.status_code == 200 and response.json()['status'] == 'OK'
@@ -46,6 +54,7 @@ class piawg:
 
     def get_server_list(self):
         r = requests.get('https://serverlist.piaservers.net/vpninfo/servers/v4')
+#        self.__print_response(r)
         # Only process first line of response, there's some base64 data at the end we're ignoring
         data = json.loads(r.text.splitlines()[0])
         for server in data['regions']:
@@ -56,6 +65,7 @@ class piawg:
             raise KeyError('Region "{}" is not a valid one'.format(region_id))
 
         self.region = region_id
+        print(json.dumps(self.server_list[self.region], indent=2))
 
     def get_token(self, username, password):
         cn, ip = self.meta_server()
@@ -64,6 +74,7 @@ class piawg:
             headers={"Host": cn},
             auth=(username, password)
         )
+        self.__print_response(r)
 
         if self.__is_valid_response(r):
             self.token = r.json()['token']
@@ -94,6 +105,7 @@ class piawg:
             ),
             headers={"Host": cn}
         )
+        self.__print_response(r)
 
         if self.__is_valid_response(r):
             self.connection = r.json()
