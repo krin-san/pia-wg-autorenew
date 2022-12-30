@@ -13,8 +13,8 @@ REQUIRED_KEYS = {
     "UPDATE_INTERVAL" : int,
     "REGION" : str
 }
-WG_CONFIG_FILE='/app/wg0.conf'
-CONNECTION_DETAILS_FILE='/app/connection.env'
+WG_CONFIG_FILE='/app/wg{}.conf'
+CONNECTION_DETAILS_FILE='/app/connection{}.env'
 
 
 class PiaWGDaemon:
@@ -22,6 +22,7 @@ class PiaWGDaemon:
         logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')
 
         self.config = {}
+        self.config["CONFIG_COUNT"] = int(os.environ.get("CONFIG_COUNT", "1"))
 
         for key in REQUIRED_KEYS:
             current_param = os.environ.get(key)
@@ -61,15 +62,16 @@ class PiaWGDaemon:
                     time.sleep(self.loop_delay)
                     continue
 
-                pia = piawg()
-                pia.set_region(self.config["REGION"])
-                self.update_wireguard_config(pia)
+                for index in range(self.config["CONFIG_COUNT"]):
+                    pia = piawg()
+                    pia.set_region(self.config["REGION"])
+                    self.update_wireguard_config(pia, index)
 
         except KeyboardInterrupt:
             logging.info("Event Loop Interrupted, exiting")
             exit()
 
-    def update_wireguard_config(self, pia):
+    def update_wireguard_config(self, pia, index):
         logging.info("Updating Token")
 
         pia.generate_keys()
@@ -95,12 +97,12 @@ class PiaWGDaemon:
             logging.error(response)
             return
 
-        self.write_file(pia)
+        self.write_file(pia, index)
 
-    def write_file(self, pia):
+    def write_file(self, pia, index):
         logging.info("Writing Wireguard config")
 
-        with open(WG_CONFIG_FILE, 'w+') as file:
+        with open(WG_CONFIG_FILE.format(index), 'w+') as file:
             file.write('[Interface]\n')
             file.write('Address = {}\n'.format(pia.connection['peer_ip']))
             file.write('PrivateKey = {}\n'.format(pia.private_key))
@@ -111,7 +113,7 @@ class PiaWGDaemon:
             file.write('AllowedIPs = 0.0.0.0/0\n')
             file.write('PersistentKeepalive = 25\n')
 
-        with open(CONNECTION_DETAILS_FILE, 'w+') as file:
+        with open(CONNECTION_DETAILS_FILE.format(index), 'w+') as file:
             cn, ip = pia.wireguard_server()
             file.write('PF_GATEWAY="{}"\n'.format(ip))
             file.write('PF_HOSTNAME="{}"\n'.format(cn))
