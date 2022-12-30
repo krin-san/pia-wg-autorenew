@@ -25,10 +25,10 @@ class piawg:
         # Only process first line of response, there's some base64 data at the end we're ignoring
         data = json.loads(r.text.splitlines()[0])
         for server in data['regions']:
-            self.server_list[server['name']] = server
+            self.server_list[server['id']] = server
 
-    def set_region(self, region_name):
-        self.region = region_name
+    def set_region(self, region_id):
+        self.region = region_id
 
     def get_token(self, username, password):
         # Get common name and IP address for metadata endpoint in region
