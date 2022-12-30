@@ -14,6 +14,7 @@ REQUIRED_KEYS = {
     "REGION" : str
 }
 WG_CONFIG_FILE='/app/wg0.conf'
+CONNECTION_DETAILS_FILE='/app/connection.env'
 
 
 class PiaWGDaemon:
@@ -109,6 +110,12 @@ class PiaWGDaemon:
             file.write('Endpoint = {}:1337\n'.format(pia.connection['server_ip']))
             file.write('AllowedIPs = 0.0.0.0/0\n')
             file.write('PersistentKeepalive = 25\n')
+
+        with open(CONNECTION_DETAILS_FILE, 'w+') as file:
+            cn, ip = pia.wireguard_server()
+            file.write('PF_GATEWAY="{}"\n'.format(ip))
+            file.write('PF_HOSTNAME="{}"\n'.format(cn))
+            file.write('PIA_TOKEN="{}"\n'.format(pia.token))
 
 
 if __name__ == "__main__":
