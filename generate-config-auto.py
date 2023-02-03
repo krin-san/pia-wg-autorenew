@@ -56,12 +56,14 @@ class PiaWGDaemon:
         self.last_config_update = 0
 
     def event_loop(self):
+        logging.info("Starting event loop...")
         try:
             while True:
-                if time.monotonic() - self.last_config_update < self.config["UPDATE_INTERVAL"]:
+                if self.last_config_update != 0 and time.monotonic() - self.last_config_update < self.config["UPDATE_INTERVAL"]:
                     time.sleep(self.loop_delay)
                     continue
 
+                logging.info("Updating configs...")
                 for index in range(self.config["CONFIG_COUNT"]):
                     pia = piawg()
                     pia.set_region(self.config["REGION"])
